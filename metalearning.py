@@ -11,6 +11,8 @@ from sklearn.naive_bayes import GaussianNB
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import AllKNN, RandomUnderSampler
 import sklearn.ensemble as ensemble
+from sklearn import preprocessing
+from sklearn.metrics import make_scorer
 
 from genetic_selection import GeneticSelectionCV
 
@@ -42,6 +44,12 @@ def main():
     c, r = y.shape
     y = y.reshape(c, )
 
+    # test set
+    x_test = np.array(samples[NUM_SAMPLES_TO_USE:2*NUM_SAMPLES_TO_USE, ::])
+    y_test = np.array(labels[NUM_SAMPLES_TO_USE:2*NUM_SAMPLES_TO_USE, ::])
+    c, r = y_test.shape
+    y_test = y_test.reshape(c, )
+
     # sm = SMOTE(random_state=42)
     # X, y = sm.fit_sample(X,y)
 
@@ -62,17 +70,42 @@ def main():
     # SVM with out feature selection
     svm_clf = SVC(class_weight='balanced')
     print("SVM only score: ")
-    print(cross_val_score(svm_clf, X, y))
+    print("Precision: ")
+    print(cross_val_score(svm_clf, X, y, scoring=make_scorer(metrics.precision_score, pos_label='P')))
+    print("Recall:")
+    print(cross_val_score(svm_clf, X, y, scoring=make_scorer(metrics.recall_score, pos_label='P')))
 
     # bagging
-    svm_clf_bag = ensemble.BaggingClassifier(svm_clf)
-    print("Bagging Score: ")
-    print(cross_val_score(svm_clf_bag, X, y))
+    # svm_clf_bag = ensemble.BaggingClassifier(svm_clf)
+    # print("Bagging Score: ")
+    # print("Precision: ")
+    # print(cross_val_score(svm_clf_bag, X, y,
+    #                       scoring=make_scorer(metrics.precision_score,
+    #                                           pos_label='P')))
+    # print("Recall:")
+    # print(cross_val_score(svm_clf_bag, X, y,
+    #                       scoring=make_scorer(metrics.recall_score,
+    #                                           pos_label='P')))
 
     # adaboost
     svm_clf_boost = ensemble.AdaBoostClassifier(n_estimators=500)
     print("Boosted Score: ")
-    print(cross_val_score(svm_clf_boost, X, y))
+    print("Precision: ")
+    print(cross_val_score(svm_clf_boost, X, y,
+                          scoring=make_scorer(metrics.precision_score,
+                                              pos_label='P')))
+    print("Recall:")
+    print(cross_val_score(svm_clf_boost, X, y,
+                          scoring=make_scorer(metrics.recall_score,
+                                              pos_label='P')))
+    print('Test Set:')
+    print(cross_val_score(svm_clf_boost, x_test, y_test,
+                          scoring=make_scorer(metrics.precision_score,
+                                              pos_label='P')))
+    print("Recall:")
+    print(cross_val_score(svm_clf_boost, x_test, y_test,
+                          scoring=make_scorer(metrics.recall_score,
+                                              pos_label='P')))
 
 
 if __name__ == "__main__":

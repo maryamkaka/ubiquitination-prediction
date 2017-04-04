@@ -13,8 +13,9 @@ from imblearn.under_sampling import AllKNN, RandomUnderSampler
 
 from genetic_selection import GeneticSelectionCV
 
-#Control the number of samples to use for training for performance reasons
+# Control the number of samples to use for training for performance reasons
 NUM_SAMPLES_TO_USE = 5000
+
 
 def read_csv_data(file, isLabeled=True):
     data = pd.read_csv(file)
@@ -30,40 +31,41 @@ def read_csv_data(file, isLabeled=True):
         samples = data[::, 1:]
         return ids, samples
 
-def main():
 
+def main():
     siteIds, labels, samples = read_csv_data("LabelledTrain.csv")
 
-    X = np.array(samples[0:NUM_SAMPLES_TO_USE,::])
+    X = np.array(samples[0:NUM_SAMPLES_TO_USE, ::])
     # Normalize feature values, use L1 norm
     X = normalize(X, axis=0, norm='l1')
-    y = np.array(labels[0:NUM_SAMPLES_TO_USE,::])
+    y = np.array(labels[0:NUM_SAMPLES_TO_USE, ::])
     c, r = y.shape
     y = y.reshape(c, )
 
-    #sm = SMOTE(random_state=42)
-    #X, y = sm.fit_sample(X,y)
+    # sm = SMOTE(random_state=42)
+    # X, y = sm.fit_sample(X,y)
 
-    #allKnn = AllKNN(random_state=42)
-    #X, y = allKnn.fit_sample(X, y)
+    # allKnn = AllKNN(random_state=42)
+    # X, y = allKnn.fit_sample(X, y)
 
     randomUndersampler = RandomUnderSampler(random_state=42)
-    X,y = randomUndersampler.fit_sample(X,y)
+    X, y = randomUndersampler.fit_sample(X, y)
 
     print("Baseline with dummy classifier: \n")
     dummy_clf = DummyClassifier(strategy='most_frequent', random_state=0)
     dummy_clf.fit(X, y)
 
-    print("Dummy classifier: accuracy for classes " + str(dummy_clf.classes_) + " " + str(dummy_clf.class_prior_) + "\n")
-    #print(dummy_clf.score(X, y))
+    print("Dummy classifier: accuracy for classes " + str(dummy_clf.classes_) +
+          " " + str(dummy_clf.class_prior_) + "\n")
+    # print(dummy_clf.score(X, y))
 
-    #Naive Bayes:
+    # Naive Bayes:
     naive_bayes_clf = GaussianNB()
     print("Naive Bayes only score: ")
     print(cross_val_score(naive_bayes_clf, X, y))
 
 
-    #SVM with out feature selection
+    # SVM with out feature selection
     svm_clf = SVC(class_weight='balanced')
     print("SVM only score: ")
     print(cross_val_score(svm_clf, X, y))
